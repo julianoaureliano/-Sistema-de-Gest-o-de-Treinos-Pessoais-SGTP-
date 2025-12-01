@@ -1,0 +1,29 @@
+output/
+.exe
+*.exe
+# Ignorar diretórios de dependências
+node_modules/
+venv/
+.env
+*.txt
+# Ignorar arquivos de log
+*.log
+# Ignorar imagem pbm
+*.pbm
+
+# Ignorar arquivos temporários
+*.tmp
+
+# Ignorar arquivos de configuração de IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Ignorar arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar arquivos de saída do build
+/dist/
+build/
