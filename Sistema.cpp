@@ -274,23 +274,140 @@ Ficha *Sistema::buscarFichaPorId(int id)
     }
     return nullptr;
 }
+// função  para pegar entrada de inteiro para nao dar pau no programa
+int capturarInt(const string &prompt)
+{
+    int valor;
+    cout << prompt;
+    while (!(cin >> valor))
+    {
+        cout << "Entrada invalida. Digite um numero inteiro: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // limpa buffer para nao dar bugs
+    return valor;
+}
 
+// Função para pegar entrada de double para nao dar pau no programa
+double capturarDouble(const string &prompt)
+{
+    double valor;
+    cout << prompt;
+    while (!(cin >> valor))
+    {
+        cout << "Entrada invalida. Digite um numero decimal: ";
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // limpa buffer para nao dar bugs
+    return valor;
+}
 // Cadastrar novo exercício
 void Sistema::cadastrarExercicio()
 {
     // Implementar
+    limparTela();
+    string nome;
+    int tipo;
+
+    cout << "-- CADASTRO DE NOVO EXERCICIO ---" << endl;
+    cout << "Nome do Exercicio: ";
+    getline(cin, nome);
+
+    tipo = capturarInt("Tipo (1 - Cardio, 2 - Força): ");
+
+    if (tipo == 1)
+    {
+        int duracao = capturarInt("Duracao padrao (minutos): ");
+        double caloriasPorMinuto = capturarDouble("Calorias estimadas por minuto (kcal/min): ");
+
+        Exercicio *novoCardio = new Cardio(nome, duracao, caloriasPorMinuto);
+        exercicios.push_back(novoCardio);
+        cout << "X Cardio '" << nome << "' (ID: " << novoCardio->getId() << ") cadastrado." << endl;
+    }
+    else if (tipo == 2)
+    {
+        double carga = capturarDouble("Carga padrao (kg): ");
+        int series = capturarInt("Numero de Series: ");
+        int repeticoes = capturarInt("Numero de Repeticoes: ");
+        int tempoDescanso = capturarInt("Tempo de Descanso (segundos): ");
+
+        Exercicio *novaForca = new Forca(nome, carga, series, repeticoes, tempoDescanso);
+        exercicios.push_back(novaForca);
+        cout << "V Forca '" << nome << "' (ID: " << novaForca->getId() << ") cadastrada." << endl;
+    }
+    else
+    {
+        cout << "X Tipo de exercício invalido. Cadastro cancelado." << endl;
+        pausar();
+        return;
+    }
+
+    salvarDados();
+    pausar();
 }
 
 // Listar exercícios ativos
 void Sistema::listarExercicios()
 {
     // Implementar
+    limparTela();
+    cout << "-- LISTA DE EXERCICIOS ATIVOS (" << exercicios.size() << " total) ---" << endl;
+    bool ativoEncontrado = false;
+
+    for (const auto &ex : exercicios)
+    {
+        if (ex->isAtivo())
+        {
+            ex->exibirDetalhes();
+            ativoEncontrado = true;
+        }
+    }
+
+    if (!ativoEncontrado)
+    {
+        cout << "Nenhum exercicio ativo encontrado." << endl;
+    }
+    cout << "-----------------------------------------------" << endl;
+    pausar();
 }
 
 // Desativar exercício
 void Sistema::excluirExercicio()
 {
     // Implementar
+    limparTela();
+    listarExercicios();
+
+    if (exercicios.empty())
+    {
+        cout << "Nao tem exercícios para excluir." << endl;
+        pausar();
+        return;
+    }
+
+    int id = capturarInt("Digite o ID do exercício a ser desativado: ");
+    Exercicio *ex = buscarExercicioPorId(id);
+
+    if (ex)
+    {
+        if (ex->isAtivo())
+        {
+            ex->desativar();
+            cout << "V Exercicio '" << ex->getNome() << "' (ID: " << id << ") desativado com sucesso." << endl;
+            salvarDados();
+        }
+        else
+        {
+            cout << "AVISO: Exercicio '" << ex->getNome() << "' (ID: " << id << ") ja estava inativo." << endl;
+        }
+    }
+    else
+    {
+        cout << "X Exercicio com ID " << id << " nao encontrado." << endl;
+    }
+    pausar();
 }
 
 // Criar nova ficha
