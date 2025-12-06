@@ -315,7 +315,7 @@ void Sistema::cadastrarExercicio()
     cout << "Nome do Exercicio: ";
     getline(cin, nome);
 
-    tipo = capturarInt("Tipo (1 - Cardio, 2 - Força): ");
+    tipo = capturarInt("Tipo (1 - Cardio, 2 - Forca): ");
 
     if (tipo == 1)
     {
@@ -414,28 +414,164 @@ void Sistema::excluirExercicio()
 void Sistema::criarFicha()
 {
     // Implementar
+    limparTela();
+    string nome;
+
+    cout << "-- CRIAÇAO DE NOVA FICHA ---" << endl;
+    cout << "Nome da Ficha: ";
+    getline(cin, nome);
+
+    Ficha *novaFicha = new Ficha(nome);
+    fichas.push_back(novaFicha);
+    salvarDados();
+    cout << "V Ficha '" << nome << "' (ID: " << novaFicha->getId() << ") criada com sucesso." << endl;
+    pausar();
 }
 
 // Adicionar exercício à ficha
 void Sistema::adicionarExercicioFicha()
 {
     // Implementar
+    limparTela();
+
+    if (fichas.empty())
+    {
+        cout << "X Nao tem fichas cadastradas. Crie uma ficha primeiro." << endl;
+        pausar();
+        return;
+    }
+
+    if (exercicios.empty())
+    {
+        cout << "X Nao tem exercicios cadastrados. Cadastre um exercicio primeiro." << endl;
+        pausar();
+        return;
+    }
+
+    // Listar Fichas
+    cout << "-- FICHAS DISPONIVEIS ---" << endl;
+    for (const auto &f : fichas)
+    {
+        cout << "ID: " << f->getId() << " |Nome: " << f->getNome() << endl;
+    }
+    cout << "--------------------------" << endl;
+
+    int idFicha = capturarInt("Digite o ID da Ficha para adicionar exercícios: ");
+    Ficha *ficha = buscarFichaPorId(idFicha);
+
+    if (!ficha)
+    {
+        cout << "X Ficha com ID " << idFicha << " nao encontrada." << endl;
+        pausar();
+        return;
+    }
+
+    // Listar Exercícios Ativos
+    listarExercicios();
+
+    int idExercicio = capturarInt("Digite o ID do Exercício a ser adicionado (ou 0 para cancelar): ");
+    if (idExercicio == 0)
+        return;
+
+    Exercicio *exercicio = buscarExercicioPorId(idExercicio);
+
+    if (exercicio)
+    {
+        if (exercicio->isAtivo())
+        {
+            ficha->adicionarExercicio(exercicio);
+            salvarDados();
+            cout << "V Exercicio '" << exercicio->getNome() << "' adicionado à Ficha '" << ficha->getNome() << "'." << endl;
+        }
+        else
+        {
+            cout << "X O Exercicio '" << exercicio->getNome() << "' esta inativo e nao pode ser adicionado." << endl;
+        }
+    }
+    else
+    {
+        cout << "X Exercicio com ID " << idExercicio << " nao encontrado." << endl;
+    }
+    pausar();
 }
 
 // Listar todas as fichas
 void Sistema::listarFichas()
 {
     // Implementar
+    limparTela();
+    cout << "--- LISTA DE FICHAS DE TREINO (" << fichas.size() << " total) --" << endl;
+    if (fichas.empty())
+    {
+        cout << "Nenhuma ficha de treino cadastrada." << endl;
+    }
+    else
+    {
+        for (const auto &f : fichas)
+        {
+            f->exibirFicha();
+        }
+    }
+    cout << "----------------------------------------------" << endl;
+    pausar();
 }
 
 // Registrar treino realizado
 void Sistema::registrarTreino()
 {
     // Implementar
+    limparTela();
+
+    if (fichas.empty())
+    {
+        cout << "X Nao tem fichas para registrar treino." << endl;
+        pausar();
+        return;
+    }
+
+    listarFichas();
+
+    int idFicha = capturarInt("Digite o ID da Ficha executada: ");
+    Ficha *ficha = buscarFichaPorId(idFicha);
+
+    if (!ficha)
+    {
+        cout << "X Ficha com ID " << idFicha << " nao encontrada." << endl;
+        pausar();
+        return;
+    }
+
+    cout << "--- REGISTRANDO TREINO: " << ficha->getNome() << " ---" << endl;
+
+    // Mostra estimativas
+    cout << fixed << setprecision(1);
+    cout << "Estimativa de Tempo: " << ficha->calcularTempoTotal() << " min" << endl;
+    cout << "Estimativa de Calorias: " << ficha->calcularCaloriasTotais() << " kcal" << endl;
+
+    // Captura dados reais
+    double tempoReal = capturarDouble("Tempo Total Real (minutos): ");
+    double caloriasReal = capturarDouble("Calorias Totais Reais (kcal): ");
+
+    // cria o registro
+    RegistroTreino novoRegistro;
+    novoRegistro.dataHora = getDataHoraAtual(); // funçao da Utils.h
+    novoRegistro.idFicha = ficha->getId();
+    novoRegistro.nomeFicha = ficha->getNome();
+    novoRegistro.tempoTotal = tempoReal;
+    novoRegistro.caloriasTotal = caloriasReal;
+
+    historico.adicionarRegistro(novoRegistro);
+    historico.salvarEmArquivo(); // salva o historico
+
+    cout << "V Execucao da Ficha '" << ficha->getNome() << "' registrada com sucesso." << endl;
+    pausar();
 }
 
 // Exibir histórico de treinos
 void Sistema::exibirHistorico()
 {
     // Implementar
+    limparTela();
+    historico.exibirHistorico();
+    pausar();
 }

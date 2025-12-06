@@ -50,11 +50,11 @@ void Ficha::exibirFicha() const
 
     if (exercicios.empty())
     {
-        cout << "Esta ficha ainda não possui exercícios." << endl;
+        cout << "Esta ficha ainda não possui exercicios." << endl;
     }
     else
     {
-        cout << "Exercícios:" << endl;
+        cout << "Exercicios:" << endl;
         for (const auto &exercicio : exercicios)
         {
             exercicio->exibirDetalhes(); // polimorfismo
